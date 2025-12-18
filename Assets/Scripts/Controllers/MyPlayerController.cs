@@ -39,7 +39,6 @@ public class MyPlayerController : PlayerController
 
 		if (_coSkillCooltime == null && Input.GetKey(KeyCode.Space))
 		{
-			Debug.Log($"Skill and State: {State}");
 
 			C2S_SKILL skill = new C2S_SKILL() { Info = new SkillInfo() };
 			skill.Info.SkillId = 2;

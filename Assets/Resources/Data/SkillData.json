@@ -1,0 +1,38 @@
+{
+    "skills": [
+        {
+            "id": 1,
+            "name": "평타",
+            "cooldown": 0.5,
+            "damage": 10,
+            "skillType": 1,
+            "projectile": null
+        },
+        {
+            "id": 2,
+            "name": "화살",
+            "cooldown": 0.5,
+            "damage": 5,
+            "skillType": 2,
+            "projectile": {
+                "name": "Arrow",
+                "speed": 10.0,
+                "range": 10,
+                "prefab": "Creature/Arrow"
+            }
+        },
+        {
+            "id": 3,
+            "name": "파이어볼",
+            "cooldown": 2.0,
+            "damage": 30,
+            "skillType": 2,
+            "projectile": {
+                "name": "Fireball",
+                "speed": 15.0,
+                "range": 8,
+                "prefab": "Creature/Fireball"
+            }
+        }
+    ]
+}

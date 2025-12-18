@@ -28,11 +28,12 @@ namespace Google.Protobuf.Protocol {
             "T05FEAASCgoGUExBWUVSEAESCwoHTU9OU1RFUhACEg4KClBST0pFQ1RJTEUQ",
             "Ayo6Cg1DcmVhdHVyZVN0YXRlEggKBElkbGUQABIKCgZNb3ZpbmcQARIJCgVT",
             "a2lsbBACEggKBERlYWQQAyowCgdNb3ZlRGlyEgYKAlVwEAASCAoERG93bhAB",
-            "EggKBExlZnQQAhIJCgVSaWdodBADQhuqAhhHb29nbGUuUHJvdG9idWYuUHJv",
-            "dG9jb2xiBnByb3RvMw=="));
+            "EggKBExlZnQQAhIJCgVSaWdodBADKkEKCVNraWxsVHlwZRIOCgpTS0lMTF9O",
+            "T05FEAASDgoKU0tJTExfQVVUTxABEhQKEFNLSUxMX1BST0pFQ1RJTEUQAkIb",
+            "qgIYR29vZ2xlLlByb3RvYnVmLlByb3RvY29sYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Google.Protobuf.Protocol.GameObjectType), typeof(global::Google.Protobuf.Protocol.CreatureState), typeof(global::Google.Protobuf.Protocol.MoveDir), }, null, null));
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Google.Protobuf.Protocol.GameObjectType), typeof(global::Google.Protobuf.Protocol.CreatureState), typeof(global::Google.Protobuf.Protocol.MoveDir), typeof(global::Google.Protobuf.Protocol.SkillType), }, null, null));
     }
     #endregion
 
@@ -57,6 +58,12 @@ namespace Google.Protobuf.Protocol {
     [pbr::OriginalName("Down")] Down = 1,
     [pbr::OriginalName("Left")] Left = 2,
     [pbr::OriginalName("Right")] Right = 3,
+  }
+
+  public enum SkillType {
+    [pbr::OriginalName("SKILL_NONE")] SkillNone = 0,
+    [pbr::OriginalName("SKILL_AUTO")] SkillAuto = 1,
+    [pbr::OriginalName("SKILL_PROJECTILE")] SkillProjectile = 2,
   }
 
   #endregion
