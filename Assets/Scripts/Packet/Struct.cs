@@ -30,16 +30,18 @@ namespace Google.Protobuf.Protocol {
             "GAQgASgLMhIuUHJvdG9jb2wuU3RhdEluZm8idgoMUG9zaXRpb25JbmZvEiYK",
             "BXN0YXRlGAEgASgOMhcuUHJvdG9jb2wuQ3JlYXR1cmVTdGF0ZRIiCgdtb3Zl",
             "RGlyGAIgASgOMhEuUHJvdG9jb2wuTW92ZURpchIMCgRwb3NYGAMgASgFEgwK",
-            "BHBvc1kYBCABKAUiHAoJU2tpbGxJbmZvEg8KB3NraWxsSWQYASABKAUiNAoI",
-            "U3RhdEluZm8SCgoCaHAYASABKAUSDQoFbWF4SHAYAiABKAUSDQoFc3BlZWQY",
-            "AyABKAJCG6oCGEdvb2dsZS5Qcm90b2J1Zi5Qcm90b2NvbGIGcHJvdG8z"));
+            "BHBvc1kYBCABKAUiHAoJU2tpbGxJbmZvEg8KB3NraWxsSWQYASABKAUiZQoI",
+            "U3RhdEluZm8SDQoFbGV2ZWwYASABKAUSCgoCaHAYAiABKAUSDQoFbWF4SHAY",
+            "AyABKAUSDgoGYXR0YWNrGAQgASgFEg0KBXNwZWVkGAUgASgCEhAKCHRvdGFs",
+            "RXhwGAYgASgFQhuqAhhHb29nbGUuUHJvdG9idWYuUHJvdG9jb2xiBnByb3Rv",
+            "Mw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.Protocol.EnumReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Google.Protobuf.Protocol.ObjectInfo), global::Google.Protobuf.Protocol.ObjectInfo.Parser, new[]{ "ObjectId", "Name", "PosInfo", "StatInfo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Google.Protobuf.Protocol.PositionInfo), global::Google.Protobuf.Protocol.PositionInfo.Parser, new[]{ "State", "MoveDir", "PosX", "PosY" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Google.Protobuf.Protocol.SkillInfo), global::Google.Protobuf.Protocol.SkillInfo.Parser, new[]{ "SkillId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Google.Protobuf.Protocol.StatInfo), global::Google.Protobuf.Protocol.StatInfo.Parser, new[]{ "Hp", "MaxHp", "Speed" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Google.Protobuf.Protocol.StatInfo), global::Google.Protobuf.Protocol.StatInfo.Parser, new[]{ "Level", "Hp", "MaxHp", "Attack", "Speed", "TotalExp" }, null, null, null, null)
           }));
     }
     #endregion
@@ -887,9 +889,12 @@ namespace Google.Protobuf.Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public StatInfo(StatInfo other) : this() {
+      level_ = other.level_;
       hp_ = other.hp_;
       maxHp_ = other.maxHp_;
+      attack_ = other.attack_;
       speed_ = other.speed_;
+      totalExp_ = other.totalExp_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -899,8 +904,20 @@ namespace Google.Protobuf.Protocol {
       return new StatInfo(this);
     }
 
+    /// <summary>Field number for the "level" field.</summary>
+    public const int LevelFieldNumber = 1;
+    private int level_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Level {
+      get { return level_; }
+      set {
+        level_ = value;
+      }
+    }
+
     /// <summary>Field number for the "hp" field.</summary>
-    public const int HpFieldNumber = 1;
+    public const int HpFieldNumber = 2;
     private int hp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -912,7 +929,7 @@ namespace Google.Protobuf.Protocol {
     }
 
     /// <summary>Field number for the "maxHp" field.</summary>
-    public const int MaxHpFieldNumber = 2;
+    public const int MaxHpFieldNumber = 3;
     private int maxHp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -923,8 +940,20 @@ namespace Google.Protobuf.Protocol {
       }
     }
 
+    /// <summary>Field number for the "attack" field.</summary>
+    public const int AttackFieldNumber = 4;
+    private int attack_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Attack {
+      get { return attack_; }
+      set {
+        attack_ = value;
+      }
+    }
+
     /// <summary>Field number for the "speed" field.</summary>
-    public const int SpeedFieldNumber = 3;
+    public const int SpeedFieldNumber = 5;
     private float speed_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -932,6 +961,18 @@ namespace Google.Protobuf.Protocol {
       get { return speed_; }
       set {
         speed_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "totalExp" field.</summary>
+    public const int TotalExpFieldNumber = 6;
+    private int totalExp_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int TotalExp {
+      get { return totalExp_; }
+      set {
+        totalExp_ = value;
       }
     }
 
@@ -950,9 +991,12 @@ namespace Google.Protobuf.Protocol {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (Level != other.Level) return false;
       if (Hp != other.Hp) return false;
       if (MaxHp != other.MaxHp) return false;
+      if (Attack != other.Attack) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Speed, other.Speed)) return false;
+      if (TotalExp != other.TotalExp) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -960,9 +1004,12 @@ namespace Google.Protobuf.Protocol {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
+      if (Level != 0) hash ^= Level.GetHashCode();
       if (Hp != 0) hash ^= Hp.GetHashCode();
       if (MaxHp != 0) hash ^= MaxHp.GetHashCode();
+      if (Attack != 0) hash ^= Attack.GetHashCode();
       if (Speed != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Speed);
+      if (TotalExp != 0) hash ^= TotalExp.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -981,17 +1028,29 @@ namespace Google.Protobuf.Protocol {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (Hp != 0) {
+      if (Level != 0) {
         output.WriteRawTag(8);
+        output.WriteInt32(Level);
+      }
+      if (Hp != 0) {
+        output.WriteRawTag(16);
         output.WriteInt32(Hp);
       }
       if (MaxHp != 0) {
-        output.WriteRawTag(16);
+        output.WriteRawTag(24);
         output.WriteInt32(MaxHp);
       }
+      if (Attack != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Attack);
+      }
       if (Speed != 0F) {
-        output.WriteRawTag(29);
+        output.WriteRawTag(45);
         output.WriteFloat(Speed);
+      }
+      if (TotalExp != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(TotalExp);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -1003,17 +1062,29 @@ namespace Google.Protobuf.Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (Hp != 0) {
+      if (Level != 0) {
         output.WriteRawTag(8);
+        output.WriteInt32(Level);
+      }
+      if (Hp != 0) {
+        output.WriteRawTag(16);
         output.WriteInt32(Hp);
       }
       if (MaxHp != 0) {
-        output.WriteRawTag(16);
+        output.WriteRawTag(24);
         output.WriteInt32(MaxHp);
       }
+      if (Attack != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Attack);
+      }
       if (Speed != 0F) {
-        output.WriteRawTag(29);
+        output.WriteRawTag(45);
         output.WriteFloat(Speed);
+      }
+      if (TotalExp != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(TotalExp);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -1025,14 +1096,23 @@ namespace Google.Protobuf.Protocol {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
+      if (Level != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Level);
+      }
       if (Hp != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Hp);
       }
       if (MaxHp != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaxHp);
       }
+      if (Attack != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Attack);
+      }
       if (Speed != 0F) {
         size += 1 + 4;
+      }
+      if (TotalExp != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TotalExp);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1046,14 +1126,23 @@ namespace Google.Protobuf.Protocol {
       if (other == null) {
         return;
       }
+      if (other.Level != 0) {
+        Level = other.Level;
+      }
       if (other.Hp != 0) {
         Hp = other.Hp;
       }
       if (other.MaxHp != 0) {
         MaxHp = other.MaxHp;
       }
+      if (other.Attack != 0) {
+        Attack = other.Attack;
+      }
       if (other.Speed != 0F) {
         Speed = other.Speed;
+      }
+      if (other.TotalExp != 0) {
+        TotalExp = other.TotalExp;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1071,15 +1160,27 @@ namespace Google.Protobuf.Protocol {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            Hp = input.ReadInt32();
+            Level = input.ReadInt32();
             break;
           }
           case 16: {
+            Hp = input.ReadInt32();
+            break;
+          }
+          case 24: {
             MaxHp = input.ReadInt32();
             break;
           }
-          case 29: {
+          case 32: {
+            Attack = input.ReadInt32();
+            break;
+          }
+          case 45: {
             Speed = input.ReadFloat();
+            break;
+          }
+          case 48: {
+            TotalExp = input.ReadInt32();
             break;
           }
         }
@@ -1098,15 +1199,27 @@ namespace Google.Protobuf.Protocol {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            Hp = input.ReadInt32();
+            Level = input.ReadInt32();
             break;
           }
           case 16: {
+            Hp = input.ReadInt32();
+            break;
+          }
+          case 24: {
             MaxHp = input.ReadInt32();
             break;
           }
-          case 29: {
+          case 32: {
+            Attack = input.ReadInt32();
+            break;
+          }
+          case 45: {
             Speed = input.ReadFloat();
+            break;
+          }
+          case 48: {
+            TotalExp = input.ReadInt32();
             break;
           }
         }

@@ -66,6 +66,21 @@ class PacketHandler
 			pc.UseSkill(skillPacket.Info.SkillId);
 		}
 	}
+
+	public static void S_ChangeHpHandler(PacketSession session, IMessage packet)
+	{
+		S2C_CHANGE_HP changeHpPacket = packet as S2C_CHANGE_HP;
+
+		GameObject go = Managers.Object.FindById(changeHpPacket.ObjectId);
+		if (go == null)
+			return;
+
+		CreatureController cc = go.GetComponent<CreatureController>();
+		if (cc != null)
+		{
+			cc.Stat.Hp = changeHpPacket.Hp;
+			// TODO UI 갱신
+			Debug.Log($"ChangeHP : {changeHpPacket.Hp}");
+		}
+	}
 }
-
-
