@@ -38,6 +38,9 @@ class PacketManager
 
 		_onRecv.Add((ushort)PacketId.PktS2CChangeHp, MakePacket<S2C_CHANGE_HP>);
 		_handler.Add((ushort)PacketId.PktS2CChangeHp, PacketHandler.S_ChangeHpHandler);
+
+		_onRecv.Add((ushort)PacketId.PktS2CDie, MakePacket<S2C_DIE>);
+		_handler.Add((ushort)PacketId.PktS2CDie, PacketHandler.S_DieHandler);
 	}
 
 	public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer)
