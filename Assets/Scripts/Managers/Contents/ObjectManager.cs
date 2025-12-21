@@ -18,7 +18,6 @@ public class ObjectManager
 	public void Add(ObjectInfo info, bool myPlayer = false)
 	{
 		GameObjectType objectType = GetObjectTypeById(info.ObjectId);
-		Debug.Log($"**** GameObjectType: {objectType} , {info.ObjectId}");
 		if (objectType == GameObjectType.Player)
 		{
 			if (myPlayer)
@@ -48,7 +47,15 @@ public class ObjectManager
 		}
 		else if (objectType == GameObjectType.Monster)
 		{
+			GameObject go = Managers.Resource.Instantiate("Creature/Monster");
+			go.name = info.Name;
+			_objects.Add(info.ObjectId, go);
 
+			MonsterController mc = go.GetComponent<MonsterController>();
+			mc.Id = info.ObjectId;
+			mc.PosInfo = info.PosInfo;
+			mc.Stat = info.StatInfo;
+			mc.SyncPos();
 		}
 		else if (objectType == GameObjectType.Projectile)
 		{
@@ -59,9 +66,6 @@ public class ObjectManager
 			ArrowController ac = go.GetComponent<ArrowController>();
 			ac.PosInfo = info.PosInfo;
 			ac.Stat = info.StatInfo;
-
-			//ac.Dir = info.PosInfo.MoveDir;
-			//ac.CellPos = new Vector3Int(info.PosInfo.PosX, info.PosInfo.PosY, 0);
 			ac.SyncPos();
 		}
 	}
@@ -116,5 +120,4 @@ public class ObjectManager
 		_objects.Clear();
 		MyPlayer = null;
 	}
-	
 }
