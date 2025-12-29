@@ -26,7 +26,10 @@ class PacketManager
 		_onRecv.Add((ushort)PacketId.PktS2CEnterGame, MakePacket<S2C_ENTER_GAME>);
 		_handler.Add((ushort)PacketId.PktS2CEnterGame, PacketHandler.S_EnterGameHandler);		
 		_onRecv.Add((ushort)PacketId.PktS2CLeaveGame, MakePacket<S2C_LEAVE_GAME>);
-		_handler.Add((ushort)PacketId.PktS2CLeaveGame, PacketHandler.S_LeaveGameHandler);		
+		_handler.Add((ushort)PacketId.PktS2CLeaveGame, PacketHandler.S_LeaveGameHandler);
+		_onRecv.Add((ushort)PacketId.PktS2CPing, MakePacket<S2C_PING>);
+		_handler.Add((ushort)PacketId.PktS2CPing, PacketHandler.S_PingHandler);
+
 		_onRecv.Add((ushort)PacketId.PktS2CSpawn, MakePacket<S2C_SPAWN>);
 		_handler.Add((ushort)PacketId.PktS2CSpawn, PacketHandler.S_SpawnHandler);		
 		_onRecv.Add((ushort)PacketId.PktS2CDespawn, MakePacket<S2C_DESPAWN>);

@@ -19,6 +19,12 @@ class PacketHandler
 		Managers.Object.Clear();
 	}
 
+	public static void S_PingHandler(PacketSession session, IMessage packet)
+	{
+		C2S_PONG pongPacket = new C2S_PONG();
+		Managers.Network.Send(pongPacket);
+	}
+
 	public static void S_SpawnHandler(PacketSession session, IMessage packet)
 	{
 		S2C_SPAWN spawnPacket = packet as S2C_SPAWN;
