@@ -9,12 +9,16 @@ namespace ServerCore
         private byte[] _iv;
         private bool _initialized = false;
 
-        // 서버와 동일한 키
+        public const int HMAC_SIZE = 32;
+        public const int BLOCK_SIZE = 16;
+
         public static readonly byte[] DefaultKey = new byte[]
         {
-            0x4E, 0x61, 0x6D, 0x6F, 0x53, 0x65, 0x72, 0x76,  // "NamoServ"
-            0x65, 0x72, 0x4B, 0x65, 0x79, 0x31, 0x32, 0x33   // "erKey123"
+            0x4E, 0x61, 0x6D, 0x6F, 0x53, 0x65, 0x72, 0x76,
+            0x65, 0x72, 0x4B, 0x65, 0x79, 0x31, 0x32, 0x33
         };
+
+        public bool IsInitialized => _initialized;
 
         public bool Init(byte[] key)
         {
@@ -24,7 +28,7 @@ namespace ServerCore
             _key = new byte[16];
             _iv = new byte[16];
             Array.Copy(key, _key, 16);
-            Array.Copy(key, _iv, 16);  // 서버와 동일하게 키를 IV로 사용
+            Array.Copy(key, _iv, 16);
             _initialized = true;
             return true;
         }
@@ -65,6 +69,27 @@ namespace ServerCore
                     return decryptor.TransformFinalBlock(data, 0, data.Length);
                 }
             }
+        }
+
+        public byte[] ComputeHMAC(byte[] data, int offset, int count)
+        {
+            if (!_initialized) return null;
+            using (HMACSHA256 hmac = new HMACSHA256(_key))
+            {
+                return hmac.ComputeHash(data, offset, count);
+            }
+        }
+
+        public bool VerifyHMAC(byte[] data, int dataOffset, int dataCount,
+                               byte[] buffer, int hmacOffset)
+        {
+            if (!_initialized) return false;
+            byte[] computed = ComputeHMAC(data, dataOffset, dataCount);
+
+            int result = 0;
+            for (int i = 0; i < HMAC_SIZE; i++)
+                result |= computed[i] ^ buffer[hmacOffset + i];
+            return result == 0;
         }
 
         public static int GetEncryptedSize(int plainSize)
