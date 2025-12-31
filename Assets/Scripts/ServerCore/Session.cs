@@ -13,6 +13,7 @@ namespace ServerCore
 		public static readonly int HeaderSize = 2;
 
 		// [size(2)][packetId(2)][ ... ][size(2)][packetId(2)][ ... ]
+		/*
 		public sealed override int OnRecv(ArraySegment<byte> buffer)
 		{
 			int processLen = 0;
@@ -37,9 +38,56 @@ namespace ServerCore
 		
 			return processLen;
 		}
+		*/
+
+		public sealed override int OnRecv(ArraySegment<byte> buffer)
+		{
+			int processLen = 0;
+
+			while (true)
+			{
+				if (buffer.Count < HeaderSize)
+					break;
+
+				ushort dataSize = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
+				if (buffer.Count < dataSize)
+					break;
+
+				// 암호화 ON -> 복호화 처리
+				if (Session.EncryptionEnabled && _crypto != null)
+				{
+					int encryptedPayloadSize = dataSize - 2;
+					byte[] encryptedPayload = new byte[encryptedPayloadSize];
+					Array.Copy(buffer.Array, buffer.Offset + 2, encryptedPayload, 0, encryptedPayloadSize);
+
+					byte[] decrypted = _crypto.Decrypt(encryptedPayload);
+					if (decrypted == null)
+						return -1;  // 복호화 실패
+
+					// 복호화된 패킷 재구성: [size(2)][id(2)][data...]
+					int decryptedPacketSize = 2 + decrypted.Length;
+					byte[] decryptedPacket = new byte[decryptedPacketSize];
+					Array.Copy(BitConverter.GetBytes((ushort)decryptedPacketSize), 0, decryptedPacket, 0, 2);
+					Array.Copy(decrypted, 0, decryptedPacket, 2, decrypted.Length);
+
+					OnRecvPacket(new ArraySegment<byte>(decryptedPacket, 0, decryptedPacketSize));
+				}
+				else
+				{
+					OnRecvPacket(new ArraySegment<byte>(buffer.Array, buffer.Offset, dataSize));
+				}
+
+				processLen += dataSize;
+				buffer = new ArraySegment<byte>(buffer.Array, buffer.Offset + dataSize, buffer.Count - dataSize);
+			}
+
+			return processLen;
+		}
 
 		public abstract void OnRecvPacket(ArraySegment<byte> buffer);
 	}
+	
+
 
 	public abstract class Session
 	{
@@ -59,6 +107,9 @@ namespace ServerCore
 		public abstract void OnSend(int numOfBytes);
 		public abstract void OnDisconnected(EndPoint endPoint);
 
+		public static bool EncryptionEnabled = true;  // 암호화 활성화 플래그
+		protected AESCrypto _crypto;
+
 		void Clear()
 		{
 			lock (_lock)
@@ -71,6 +122,12 @@ namespace ServerCore
 		public void Start(Socket socket)
 		{
 			_socket = socket;
+
+			if (EncryptionEnabled)
+			{
+				_crypto = new AESCrypto();
+				_crypto.Init(AESCrypto.DefaultKey);
+			}
 
 			_recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
 			_sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
@@ -95,12 +152,49 @@ namespace ServerCore
 
 		public void Send(ArraySegment<byte> sendBuff)
 		{
+			if (EncryptionEnabled && _crypto != null)
+			{
+				sendBuff = EncryptBuffer(sendBuff);
+				if (sendBuff.Array == null)
+					return;
+			}
+
 			lock (_lock)
 			{
 				_sendQueue.Enqueue(sendBuff);
 				if (_pendingList.Count == 0)
 					RegisterSend();
 			}
+		}
+
+		private ArraySegment<byte> EncryptBuffer(ArraySegment<byte> buffer)
+		{
+			// 원본: [size(2)][id(2)][data...]
+			// 암호화: [size(2)][encrypted(id+data)...]
+
+			int plainSize = buffer.Count;
+			if (plainSize < 2)
+				return buffer;
+
+			// id+data 부분만 암호화 (size 제외)
+			int payloadSize = plainSize - 2;
+			byte[] payload = new byte[payloadSize];
+			Array.Copy(buffer.Array, buffer.Offset + 2, payload, 0, payloadSize);
+
+			byte[] encrypted = _crypto.Encrypt(payload);
+			if (encrypted == null)
+				return new ArraySegment<byte>(null, 0, 0);
+
+			// 새 버퍼: [size(2)][encrypted]
+			int totalSize = 2 + encrypted.Length;
+			byte[] result = new byte[totalSize];
+
+			// size 기록
+			Array.Copy(BitConverter.GetBytes((ushort)totalSize), 0, result, 0, 2);
+			// encrypted 복사
+			Array.Copy(encrypted, 0, result, 2, encrypted.Length);
+
+			return new ArraySegment<byte>(result);
 		}
 
 		public void Disconnect()
