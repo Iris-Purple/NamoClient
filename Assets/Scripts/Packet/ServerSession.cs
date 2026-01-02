@@ -10,64 +10,83 @@ using UnityEngine;
 
 public class ServerSession : PacketSession
 {
-	public void Send(IMessage packet)
-	{
-		string msgName = "Pkt" + ToPascalCase(packet.GetType().Name);
-		PacketId msgId = (PacketId)Enum.Parse(typeof(PacketId), msgName);
-		ushort size = (ushort)packet.CalculateSize();
-		byte[] sendBuffer = new byte[size + 4];
-		Array.Copy(BitConverter.GetBytes((ushort)(size + 4)), 0, sendBuffer, 0, sizeof(ushort));
-		Array.Copy(BitConverter.GetBytes((ushort)msgId), 0, sendBuffer, 2, sizeof(ushort));
-		Array.Copy(packet.ToByteArray(), 0, sendBuffer, 4, size);
-		Send(new ArraySegment<byte>(sendBuffer));
-	}
+    public void Send(IMessage packet)
+    {
+        string msgName = "Pkt" + ToPascalCase(packet.GetType().Name);
+        PacketId msgId = (PacketId)Enum.Parse(typeof(PacketId), msgName);
 
-	public override void OnConnected(EndPoint endPoint)
-	{
-		Debug.Log($"OnConnected : {endPoint}");
-		
-		C2S_ENTER_GAME enterPacket = new C2S_ENTER_GAME();
-		Managers.Network.Send(enterPacket);
+        ushort dataSize = (ushort)packet.CalculateSize();
+        ushort packetSize = (ushort)(dataSize + HeaderSize);
+        byte[] sendBuffer = new byte[packetSize];
+        // size (2 bytes)
+        Array.Copy(BitConverter.GetBytes(packetSize), 0, sendBuffer, 0, 2);
+        // id (2 bytes)
+        Array.Copy(BitConverter.GetBytes((ushort)msgId), 0, sendBuffer, 2, 2);
+        // flags (1 byte)
+        sendBuffer[4] = NeedsSequence(msgId) ? PKT_FLAG_HAS_SEQUENCE : (byte)0;
+        // sequence (4 bytes) - Send()에서 설정됨
+        Array.Copy(BitConverter.GetBytes((uint)0), 0, sendBuffer, 5, 4);
+        // data
+        Array.Copy(packet.ToByteArray(), 0, sendBuffer, HeaderSize, dataSize);
 
-		PacketManager.Instance.CustomHandler = (s, m, i) =>
-		{
-			PacketQueue.Instance.Push(i, m);
-		};
+        Send(new ArraySegment<byte>(sendBuffer));
+    }
 
-		
-	}
+    // Sequence가 필요한 패킷 여부
+    private bool NeedsSequence(PacketId packetId)
+    {
+        switch (packetId)
+        {
+            case PacketId.PktC2SSkill:
+                return true;
+            default:
+                return false;
+        }
+    }
 
-	public override void OnDisconnected(EndPoint endPoint)
-	{
-		Debug.Log($"OnDisconnected : {endPoint}");
-	}
+    public override void OnConnected(EndPoint endPoint)
+    {
+        Debug.Log($"OnConnected : {endPoint}");
 
-	public override void OnRecvPacket(ArraySegment<byte> buffer)
-	{
-		PacketManager.Instance.OnRecvPacket(this, buffer);
-	}
+        C2S_ENTER_GAME enterPacket = new C2S_ENTER_GAME();
+        Managers.Network.Send(enterPacket);
 
-	public override void OnSend(int numOfBytes)
-	{
-		//Console.WriteLine($"Transferred bytes: {numOfBytes}");
-	}
+        PacketManager.Instance.CustomHandler = (s, m, i) =>
+        {
+            PacketQueue.Instance.Push(i, m);
+        };
+    }
 
-	private string ToPascalCase(string input)
-	{
-		var parts = input.Split('_');
-		var result = new StringBuilder();
+    public override void OnDisconnected(EndPoint endPoint)
+    {
+        Debug.Log($"OnDisconnected : {endPoint}");
+    }
 
-		foreach (var part in parts)
-		{
-			for (int i = 0; i < part.Length; i++)
-			{
-				// 첫 글자 또는 숫자 바로 뒤 글자는 대문자
-				if (i == 0 || char.IsDigit(part[i - 1]))
-					result.Append(char.ToUpper(part[i]));
-				else
-					result.Append(char.ToLower(part[i]));
-			}
-		}
-		return result.ToString();
-	}
+    public override void OnRecvPacket(ArraySegment<byte> buffer)
+    {
+        PacketManager.Instance.OnRecvPacket(this, buffer);
+    }
+
+    public override void OnSend(int numOfBytes)
+    {
+        //Console.WriteLine($"Transferred bytes: {numOfBytes}");
+    }
+
+    private string ToPascalCase(string input)
+    {
+        var parts = input.Split('_');
+        var result = new StringBuilder();
+
+        foreach (var part in parts)
+        {
+            for (int i = 0; i < part.Length; i++)
+            {
+                if (i == 0 || char.IsDigit(part[i - 1]))
+                    result.Append(char.ToUpper(part[i]));
+                else
+                    result.Append(char.ToLower(part[i]));
+            }
+        }
+        return result.ToString();
+    }
 }

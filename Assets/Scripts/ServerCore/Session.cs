@@ -10,19 +10,34 @@ namespace ServerCore
 {
     public abstract class PacketSession : Session
     {
-        public static readonly int HeaderSize = 2;
+        public static readonly int HeaderSize = 9;  // size(2) + id(2) + flags(1) + seq(4)
+        public const byte PKT_FLAG_HAS_SEQUENCE = 0x01;
 
-        // 서버 PacketSession::OnRecv와 동일 구조
+        // Sequence 카운터 (리플레이 공격 방지)
+        protected uint _recvSeq = 0;
+
         public sealed override int OnRecv(ArraySegment<byte> buffer)
         {
             int processLen = 0;
 
             while (true)
             {
-                if (buffer.Count < HeaderSize)
+                if (buffer.Count < 2)
                     break;
 
                 ushort dataSize = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
+
+                // 최소 크기 검증 (암호화 여부에 따라 다름)
+                int minSize = EncryptionEnabled
+                    ? (2 + 16 + AESCrypto.HMAC_SIZE)  // size + AES블록 + HMAC
+                    : HeaderSize;                      // 평문 헤더
+
+                if (dataSize < minSize)
+                {
+                    Debug.LogError($"Invalid packet size: {dataSize}");
+                    return -1;
+                }
+
                 if (buffer.Count < dataSize)
                     break;
 
@@ -41,7 +56,7 @@ namespace ServerCore
                     int encryptedOffset = buffer.Offset + 2;
                     int hmacOffset = buffer.Offset + 2 + encryptedPayloadSize;
 
-                    // HMAC 검증 (실패 시 패킷 폐기)
+                    // HMAC 검증
                     if (!_crypto.VerifyHMAC(buffer.Array, encryptedOffset, encryptedPayloadSize,
                                            buffer.Array, hmacOffset))
                     {
@@ -60,16 +75,49 @@ namespace ServerCore
                         return -1;
                     }
 
-                    // 복호화된 패킷 재구성: [size(2)][id(2)][data...]
+                    // 복호화된 패킷 크기 검증
                     int decryptedPacketSize = 2 + decrypted.Length;
+                    if (decryptedPacketSize < HeaderSize)
+                    {
+                        Debug.LogError($"Decrypted packet too small: {decryptedPacketSize}");
+                        return -1;
+                    }
+
+                    // 복호화된 패킷 재구성
                     byte[] decryptedPacket = new byte[decryptedPacketSize];
                     Array.Copy(BitConverter.GetBytes((ushort)decryptedPacketSize), 0, decryptedPacket, 0, 2);
                     Array.Copy(decrypted, 0, decryptedPacket, 2, decrypted.Length);
+
+                    // Sequence 검증
+                    byte flags = decryptedPacket[4];
+                    if ((flags & PKT_FLAG_HAS_SEQUENCE) != 0)
+                    {
+                        uint sequence = BitConverter.ToUInt32(decryptedPacket, 5);
+                        if (sequence <= _recvSeq)
+                        {
+                            Debug.LogError($"Replay attack detected: seq={sequence}, lastSeq={_recvSeq}");
+                            return -1;
+                        }
+                        _recvSeq = sequence;
+                    }
 
                     OnRecvPacket(new ArraySegment<byte>(decryptedPacket, 0, decryptedPacketSize));
                 }
                 else
                 {
+                    // 평문 - Sequence 검증
+                    byte flags = buffer.Array[buffer.Offset + 4];
+                    if ((flags & PKT_FLAG_HAS_SEQUENCE) != 0)
+                    {
+                        uint sequence = BitConverter.ToUInt32(buffer.Array, buffer.Offset + 5);
+                        if (sequence <= _recvSeq)
+                        {
+                            Debug.LogError($"Replay attack detected: seq={sequence}, lastSeq={_recvSeq}");
+                            return -1;
+                        }
+                        _recvSeq = sequence;
+                    }
+
                     OnRecvPacket(new ArraySegment<byte>(buffer.Array, buffer.Offset, dataSize));
                 }
 
@@ -101,9 +149,13 @@ namespace ServerCore
         public abstract void OnSend(int numOfBytes);
         public abstract void OnDisconnected(EndPoint endPoint);
 
-        // 암호화 설정 (Session에만 존재)
+        // 암호화 설정
         public static bool EncryptionEnabled = true;
         protected AESCrypto _crypto;
+
+        // Sequence (리플레이 공격 방지)
+        private uint _sendSeq = 0;
+        private const byte PKT_FLAG_HAS_SEQUENCE = 0x01;
 
         void Clear()
         {
@@ -147,6 +199,18 @@ namespace ServerCore
 
         public void Send(ArraySegment<byte> sendBuff)
         {
+            // Sequence 설정 (암호화 전에)
+            if (sendBuff.Count >= 9)
+            {
+                byte flags = sendBuff.Array[sendBuff.Offset + 4];
+                if ((flags & PKT_FLAG_HAS_SEQUENCE) != 0)
+                {
+                    _sendSeq++;
+                    byte[] seqBytes = BitConverter.GetBytes(_sendSeq);
+                    Array.Copy(seqBytes, 0, sendBuff.Array, sendBuff.Offset + 5, 4);
+                }
+            }
+
             if (EncryptionEnabled && _crypto != null)
             {
                 sendBuff = EncryptBuffer(sendBuff);
